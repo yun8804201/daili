@@ -1,36 +1,33 @@
 #!/bin/bash
 
-# Ò»¼ü²¿Êð Xray VLESS+TCP+Reality ·þÎñÆ÷½Å±¾
-# ÊÊÓÃ Ubuntu 20.04+ ÏµÍ³
-# Ö»ÐèÐÞ¸Ä DOMAIN ºÍ PORT ¼´¿É
-
 set -e
 
-# 1. ÅäÖÃ²ÎÊý
-DOMAIN="npc.qzz.io"   # Ìæ»»³ÉÄãµÄÎ±×°ÓòÃû£¬±ØÐëDNS½âÎöÖ¸ÏòVPS
-PORT=5634                 # ÍÆ¼ö443£¬·Ç±ØÐè£¬¿ÉÒÔ¸Ä³ÉÆäËû¶Ë¿Ú£¨1-65535£©
+# 1. é…ç½®å‚æ•°ï¼Œä¿®æ”¹ä¸ºä½ è‡ªå·±çš„åŸŸåå’Œç«¯å£
+DOMAIN="npc.qzz.io"    # ä¼ªè£…åŸŸåï¼ŒåŠ¡å¿…å·²æ­£ç¡®è§£æžåˆ°VPS IP
+PORT=4433               # å»ºè®®ä½¿ç”¨443ç«¯å£ï¼Œä¹Ÿå¯æ”¹ä¸ºå…¶ä»–ï¼ˆ1-65535ï¼‰
 
-echo "ÕýÔÚ²¿Êð VLESS+TCP+Reality ½Úµã..."
-echo "ÓòÃû: $DOMAIN"
-echo "¶Ë¿Ú: $PORT"
+echo "å¼€å§‹éƒ¨ç½² Xray VLESS+TCP+Reality èŠ‚ç‚¹"
+echo "åŸŸå: $DOMAIN"
+echo "ç«¯å£: $PORT"
 
-# 2. °²×°ÒÀÀµÓë Xray
-apt update && apt install -y curl jq
+# 2. å®‰è£…ä¾èµ–
+apt update
+apt install -y curl jq
+
+# 3. å®‰è£… Xray
 bash <(curl -Ls https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
 
-# 3. Éú³É UUID
+# 4. ç”Ÿæˆ UUID
 UUID=$(cat /proc/sys/kernel/random/uuid)
-echo "Éú³ÉµÄ UUID: $UUID"
+echo "ç”Ÿæˆçš„ UUIDï¼š$UUID"
 
-# 4. Éú³É Reality ¹«Ë½Ô¿¶Ô
-echo "Éú³É Reality ¹«Ë½Ô¿¶Ô..."
+# 5. ç”Ÿæˆ Reality å…¬ç§é’¥
 KEYS=$(xray x25519)
 PRIVATE_KEY=$(echo "$KEYS" | awk 'NR==1{print $2}')
 PUBLIC_KEY=$(echo "$KEYS" | awk 'NR==2{print $2}')
-echo "Private key: $PRIVATE_KEY"
-echo "Public key: $PUBLIC_KEY"
+echo "ç”Ÿæˆ Reality å¯†é’¥å¯¹å®Œæˆ"
 
-# 5. Ð´Èë Xray ÅäÖÃÎÄ¼þ
+# 6. ç”Ÿæˆé…ç½®æ–‡ä»¶
 CONFIG_PATH="/usr/local/etc/xray/config.json"
 
 cat > $CONFIG_PATH <<EOF
@@ -68,21 +65,21 @@ cat > $CONFIG_PATH <<EOF
 }
 EOF
 
-# 6. ¿ªÆô²¢Æô¶¯ xray ·þÎñ
+echo "é…ç½®æ–‡ä»¶å·²å†™å…¥ $CONFIG_PATH"
+
+# 7. å¯ç”¨å¹¶å¯åŠ¨ Xray æœåŠ¡
 systemctl enable xray
 systemctl restart xray
 
-# 7. Êä³ö¿Í»§¶ËÅäÖÃÐÅÏ¢ºÍÊ¾ÀýÁ´½Ó
+# 8. è¾“å‡ºå®¢æˆ·ç«¯é…ç½®å’Œç¤ºä¾‹é“¾æŽ¥
+echo -e "\néƒ¨ç½²å®Œæˆï¼è¯·ä¿å­˜ä»¥ä¸‹ä¿¡æ¯ï¼š\n"
+echo "æœåŠ¡å™¨åŸŸåï¼ˆä¼ªè£…åŸŸåï¼‰ï¼š$DOMAIN"
+echo "ç«¯å£ï¼š$PORT"
+echo "UUIDï¼š$UUID"
+echo "Reality å…¬é’¥ï¼ˆå®¢æˆ·ç«¯å¡«å†™ï¼‰ï¼š$PUBLIC_KEY"
+echo "Reality ç§é’¥ï¼ˆæœåŠ¡å™¨ç«¯ä¿ç•™ï¼‰ï¼š$PRIVATE_KEY"
 
-echo -e "\n²¿ÊðÍê³É£¡Çë±£´æÒÔÏÂÐÅÏ¢£º\n"
-echo "·þÎñÆ÷µØÖ·£¨Î±×°ÓòÃû£©£º$DOMAIN"
-echo "¶Ë¿Ú£º$PORT"
-echo "UUID£º$UUID"
-echo "Reality ¹«Ô¿£¨¿Í»§¶ËÌîÐ´£©£º$PUBLIC_KEY"
-echo "Reality Ë½Ô¿£¨¿Í»§¶Ë¿ÉÑ¡£¬Ö÷Òª·þÎñÆ÷¶ËÓÃ£©£º$PRIVATE_KEY"
+echo -e "\nå°ç«ç®­ï¼ˆShadowrocketï¼‰ç¤ºä¾‹è®¢é˜…é“¾æŽ¥ï¼š"
+echo "vless://$UUID@$DOMAIN:$PORT?security=reality&encryption=none&type=tcp&headerType=none&flow=&pbk=$PUBLIC_KEY#RealityèŠ‚ç‚¹"
 
-# 8. Éú³ÉÐ¡»ð¼ý(Shadowrocket)¿Í»§¶ËÁ´½ÓÊ¾·¶
-echo -e "\nÐ¡»ð¼ý(Shadowrocket)Ê¾Àý¶©ÔÄÁ´½Ó (Çë¸ù¾ÝÊµ¼ÊÐÅÏ¢Ìæ»»)£º"
-echo "vless://$UUID@$DOMAIN:$PORT?security=reality&encryption=none&type=tcp&headerType=none&flow=&pbk=$PUBLIC_KEY#Reality½Úµã"
-
-echo -e "\n½Å±¾Ö´ÐÐÍê±Ï¡£ÇëÈ·ÈÏÓòÃûÒÑÕýÈ·½âÎö£¬¶Ë¿ÚÎ´±»Õ¼ÓÃ¡£"
+echo -e "\nè¯·ç¡®ä¿åŸŸåå·²æ­£ç¡®è§£æžï¼Œç«¯å£å·²æ”¾è¡Œã€‚"
