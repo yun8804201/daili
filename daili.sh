@@ -32,9 +32,17 @@ KEYS=$($TMPDIR/xray x25519)
 PRIVATE_KEY=$(echo "$KEYS" | grep "Private key" | awk -F': ' '{print $2}')
 PUBLIC_KEY=$(echo "$KEYS" | grep "Public key" | awk -F': ' '{print $2}')
 
-# 计算shortId
+# 处理 Reality 公钥：将 Base64 URL 安全编码转为标准 Base64 并补齐 padding
 PUB_BASE64_STD=$(echo "$PUBLIC_KEY" | tr '_-' '/+')
+# 根据长度自动补齐 "="
+mod4=$(( ${#PUB_BASE64_STD} % 4 ))
+if [ $mod4 -ne 0 ]; then
+  padding=$((4 - mod4))
+  PUB_BASE64_STD="${PUB_BASE64_STD}$(printf '=%.0s' $(seq 1 $padding))"
+fi
 echo "$PUB_BASE64_STD" | base64 -d > $TMPDIR/pubkey.bin
+
+# 计算 shortId（取 SHA256 前 16 字符）
 SHORT_ID=$(sha256sum $TMPDIR/pubkey.bin | cut -c1-16)
 rm $TMPDIR/pubkey.bin
 
